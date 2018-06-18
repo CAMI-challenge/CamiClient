@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/java" isTestSource="true" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="CamiIO-0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="bibis3-1.6.1" level="project" />
+    <orderEntry type="library" name="CamiAwsWrapper-0.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="target" level="project" />
+    <orderEntry type="module" module-name="CamiIO" />
+    <orderEntry type="module" module-name="main" />
+    <orderEntry type="module" module-name="CamiAwsWrapper" />
+  </component>
+</module>

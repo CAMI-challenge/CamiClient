@@ -248,8 +248,7 @@ public class CLI {
     }
 
     public static void main(String[] args) {
-        CLI uploader = new CLI(new CamiIOValidator(), new BibiS3Upload(),
-                new MD5Sum());
+        CLI uploader = new CLI(new CamiIOValidator(), new BibiS3Upload(), new MD5Sum());
         try {
             uploader.processCommandLine(args);
         } catch (IOException e) {

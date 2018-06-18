@@ -39,7 +39,7 @@ public class BibiS3Upload implements IUpload {
         Map<String, String> credentials;
         try {
             credentials = mapper.readValue(file, Map.class);
-        } catch (JsonGenerationException | IOException | JsonMappingException e) {
+        } catch (IOException e) {
             throw new IOException(MALFORMED_JSON);
         }
         return credentials;

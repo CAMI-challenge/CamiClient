@@ -1,11 +1,11 @@
 package cami.upload;
 
-import cami.aws.userManagment.ICredentials;
-import cami.aws.userManagment.ResourceAction;
-import cami.aws.userManagment.S3CredentialsBuilder;
-import cami.aws.workspace.FileManagerFactory;
-import cami.aws.workspace.interfaces.IFile;
-import cami.aws.workspace.interfaces.IFileManager;
+import cami.objectstoragewrapper.core.ICredentials;
+import cami.objectstoragewrapper.aws.ResourceAction;
+import cami.objectstoragewrapper.aws.S3CredentialsBuilder;
+import cami.objectstoragewrapper.main.FileManagerFactory;
+import cami.objectstoragewrapper.core.IFile;
+import cami.objectstoragewrapper.core.IFileManager;
 import com.amazonaws.auth.policy.Condition;
 import com.amazonaws.auth.policy.actions.S3Actions;
 import com.amazonaws.auth.policy.conditions.StringCondition;

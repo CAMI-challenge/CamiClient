@@ -17,12 +17,6 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-
-        <repository>
-            <id>Bibis3</id>
-            <name>Bibis3</name>
-            <url>file://${project.basedir}/repo</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -34,22 +28,12 @@
         <dependency>
             <groupId>com.github.pbelmann</groupId>
             <artifactId>CamiIO</artifactId>
-            <version>c2eb8befa2</version>
+            <version>master-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>cebitec</groupId>
+            <groupId>com.github.bibiserv</groupId>
             <artifactId>bibis3</artifactId>
-            <version>1.6.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>master-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson</groupId>
@@ -73,7 +57,7 @@
         <dependency>
             <groupId>com.github.pbelmann</groupId>
             <artifactId>ObjectStorageWrapper</artifactId>
-            <version>master</version>
+            <version>master-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

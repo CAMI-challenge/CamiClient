@@ -2,7 +2,6 @@ package cami.validator;
 
 import cami.io.Base.ParseException;
 import cami.io.Binning;
-import cami.io.Profile;
 import cami.io.concat.ConcatProfilingIter;
 
 import java.io.File;
@@ -22,13 +21,12 @@ public class CamiIOValidator implements IValidator {
     public void validateProfiling(String path, String taxonomyDbPath) throws IOException, ParseException {
         File file = new File(path);
         File db = new File(taxonomyDbPath);
-        this.filesExist(file, db, path);
-        this.filesExist(file, db, path);
-        ConcatProfilingIter profIter;
-        profIter = new ConcatProfilingIter(file.getPath(), taxonomyDbPath, true);
-        while ((profIter.readRow()) != null) {
+        filesExist(file, db, path);
+        filesExist(file, db, path);
+        ConcatProfilingIter profilingIter = new ConcatProfilingIter(file.getPath(), taxonomyDbPath, true);
+        while ((profilingIter.readRow()) != null) {
         }
-        profIter.close();
+        profilingIter.close();
     }
 
     private void filesExist(File file, File db, String path) throws IOException {

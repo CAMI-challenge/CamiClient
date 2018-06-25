@@ -15,17 +15,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SwiftDownload {
-
     public void downloadAll(String url, String destination, String regex, int threads) {
         List<String> files = getFiles(url);
         ForkJoinPool forkJoinPool = new ForkJoinPool(threads);
         try {
-            forkJoinPool.submit(() -> {
-                files.stream().parallel().filter(file -> !file.endsWith("/")).filter(file -> matchesRegex(regex, file)).forEach(file -> download(url + "/" + file, Paths.get(destination, file).toString()));
-            }).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+            forkJoinPool.submit(() ->
+                    files.stream().parallel()
+                            .filter(file -> !file.endsWith("/"))
+                            .filter(file -> matchesRegex(regex, file))
+                            .forEach(file -> download(url + "/" + file, Paths.get(destination, file).toString()))).get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
@@ -41,18 +40,19 @@ public class SwiftDownload {
         String lastElement = "";
         while (!fileList.isEmpty() || start) {
             start = false;
-            URL website = null;
+            URL website;
             try {
                 website = new URL(url + lastElement);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                break;
             }
             try (InputStream in = website.openStream()) {
                 fileList = new BufferedReader(new InputStreamReader(in,
                         StandardCharsets.UTF_8)).lines().collect(Collectors.toList());
                 if (fileList != null && !fileList.isEmpty()) {
                     finalList.addAll(fileList);
-                    lastElement = "/?marker=" + fileList.get(fileList.size()-1);
+                    lastElement = "/?marker=" + fileList.get(fileList.size() - 1);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -67,18 +67,18 @@ public class SwiftDownload {
     }
 
     public void download(String url, String destination) {
-        URL website = null;
         System.out.println(String.join(" ", "Downloading", url, "to", destination));
+        URL website;
         try {
             website = new URL(url);
         } catch (MalformedURLException e) {
             e.printStackTrace();
+            return;
         }
         try (InputStream in = website.openStream()) {
             File destinationFile = new File(destination);
             destinationFile.getParentFile().mkdirs();
-            Files.copy(in, Paths.get(destination),
-                    new StandardCopyOption[]{StandardCopyOption.REPLACE_EXISTING});
+            Files.copy(in, Paths.get(destination), new StandardCopyOption[]{StandardCopyOption.REPLACE_EXISTING});
         } catch (IOException e) {
             e.printStackTrace();
         }

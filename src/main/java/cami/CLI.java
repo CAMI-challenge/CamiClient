@@ -34,11 +34,6 @@ public class CLI {
                     "would download everything. Number of Threads is optional. Default: 10";
     private static final String DOWNLOAD_SWIFT_OPT_NAME = "d";
 
-    private static final String LIST_SWIFT_ARG_NAME = "url";
-    private static final String LIST_SWIFT_LONG_OPT_NAME = "list";
-    private static final String LIST_SWIFT_DESCRIPTION = "Retrieves a list the data in Swift Container";
-    private static final String LIST_SWIFT_OPT_NAME = "l";
-
     private static final String ASSEMBLY_ARG_NAME = "assembly_file";
     private static final String ASSEMBLY_LONG_OPT_NAME = "assemblyFingerprint";
     private static final String ASSEMBLY_DESCRIPTION = "Computes fingerprint of an assembly file.";
@@ -98,8 +93,6 @@ public class CLI {
             runUpload(line);
         } else if (line.hasOption(DOWNLOAD_SWIFT_OPT_NAME) || line.hasOption(DOWNLOAD_SWIFT_LONG_OPT_NAME)) {
             runDownload(line);
-        } else if (line.hasOption(LIST_SWIFT_OPT_NAME) || line.hasOption(LIST_SWIFT_LONG_OPT_NAME)) {
-            runList(line);
         } else if (line.hasOption(VERSION_LONG_OPT_NAME) || line.hasOption(VERSION_OPT_NAME)) {
             System.out.println("Version:" + VERSION);
         } else {
@@ -158,9 +151,6 @@ public class CLI {
             threads = Integer.parseInt(args[3]);
         }
         try {
-            if (source.endsWith("/")) {
-                source = source.replaceFirst(".$", "");
-            }
             SwiftDownload swiftDownload = new SwiftDownload();
             swiftDownload.downloadAll(source, destination, regex, threads);
         } catch (Exception ex) {
@@ -168,22 +158,6 @@ public class CLI {
         }
     }
 
-    private void runList(CommandLine line) throws IOException {
-        String[] args = line.getOptionValues(LIST_SWIFT_OPT_NAME);
-        if (args.length != 1) {
-            throw new IOException(String.format(NOT_ENOUGH_PARAMETER, LIST_SWIFT_ARG_NAME));
-        }
-        String source = args[0];
-        try {
-            if (source.endsWith("/")) {
-                source = source.replaceFirst(".$", "");
-            }
-            SwiftDownload swiftDownload = new SwiftDownload();
-            System.out.println(swiftDownload.list(source));
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
 
     @SuppressWarnings("static-access")
     private static Options buildCommandLineOptions() {
@@ -219,12 +193,6 @@ public class CLI {
                 .hasArgs(4)
                 .withDescription(DOWNLOAD_SWIFT_DESCRIPTION)
                 .create(DOWNLOAD_SWIFT_OPT_NAME));
-        // List Swift option
-        options.addOption(OptionBuilder.withArgName(LIST_SWIFT_ARG_NAME)
-                .withLongOpt(LIST_SWIFT_LONG_OPT_NAME)
-                .hasArgs(1)
-                .withDescription(LIST_SWIFT_DESCRIPTION)
-                .create(LIST_SWIFT_OPT_NAME));
         // Help option
         options.addOption(OptionBuilder.withLongOpt(HELP_LONG_OPT_NAME)
                 .withDescription(HELP_DESCRIPTION)

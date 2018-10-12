@@ -15,59 +15,58 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SwiftDownload {
-    public void downloadAll(String url, String destination, String regex, int threads) {
-        List<String> files = getFiles(url);
+
+    public void downloadAll(String urlFile, String destination, String regex, int threads) {
+      
+        List<String> urls = new ArrayList<>();
+
+        try {
+		BufferedReader reader = new BufferedReader(new FileReader(urlFile));
+		String inputUrl;
+		while((inputUrl = reader.readLine()) != null) {
+		    urls.add(inputUrl);
+		}
+        } catch (IOException e) {
+            e.printStackTrace();
+	}
+ 
         ForkJoinPool forkJoinPool = new ForkJoinPool(threads);
         try {
             forkJoinPool.submit(() ->
-                    files.stream().parallel()
-                            .filter(file -> !file.endsWith("/"))
-                            .filter(file -> matchesRegex(regex, file))
-                            .forEach(file -> download(url + "/" + file, Paths.get(destination, file).toString()))).get();
+                    urls.stream().parallel()
+                            .filter(url -> matchesRegex(regex, url))
+                            .forEach(url -> download(url, destination))).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
     public static boolean matchesRegex(String regex, String text) {
-        return Pattern.compile(regex).matcher(text).find();
-    }
 
-    private List<String> getFiles(String url) {
-        List<String> fileList = new ArrayList<>();
-        List<String> finalList = new ArrayList<>();
-        boolean start = true;
-        String lastElement = "";
-        while (!fileList.isEmpty() || start) {
-            start = false;
-            URL website;
-            try {
-                website = new URL(url + lastElement);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                break;
-            }
-            try (InputStream in = website.openStream()) {
-                fileList = new BufferedReader(new InputStreamReader(in,
-                        StandardCharsets.UTF_8)).lines().collect(Collectors.toList());
-                if (fileList != null && !fileList.isEmpty()) {
-                    finalList.addAll(fileList);
-                    lastElement = "/?marker=" + fileList.get(fileList.size() - 1);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                break;
-            }
+        String[] urlParts = text.split("[?]", 2);
+        String bareUrl = urlParts[0];
+        String params = "";
+        if (urlParts.length == 2) {
+          params = "?" + urlParts[1];
         }
-        return finalList;
+
+        return Pattern.compile(regex).matcher(bareUrl).find();
     }
 
-    public String list(String url) {
-        return String.join(System.getProperty("line.separator"), getFiles(url));
-    }
 
     public void download(String url, String destination) {
-        System.out.println(String.join(" ", "Downloading", url, "to", destination));
+
+        String[] urlParts = url.split("[?]", 2);
+        String bareUrl = urlParts[0];
+        String params = "";
+        if (urlParts.length == 2) {
+          params = "?" + urlParts[1];
+        }
+
+	String[] bareUrlParts = bareUrl.split("/");
+	String file = Paths.get(destination, bareUrlParts[bareUrlParts.length - 1]).toString();
+
+        System.out.println(String.join(" ", "Downloading", url, "to", file));
         URL website;
         try {
             website = new URL(url);
@@ -76,9 +75,9 @@ public class SwiftDownload {
             return;
         }
         try (InputStream in = website.openStream()) {
-            File destinationFile = new File(destination);
+            File destinationFile = new File(file);
             destinationFile.getParentFile().mkdirs();
-            Files.copy(in, Paths.get(destination), new StandardCopyOption[]{StandardCopyOption.REPLACE_EXISTING});
+            Files.copy(in, Paths.get(file), new StandardCopyOption[]{StandardCopyOption.REPLACE_EXISTING});
         } catch (IOException e) {
             e.printStackTrace();
         }

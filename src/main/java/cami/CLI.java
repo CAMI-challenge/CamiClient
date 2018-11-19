@@ -27,7 +27,7 @@ public class CLI {
     private static final String HELP_DESCRIPTION = "Print the help of the application";
     private static final String HELP_OPT_NAME = "h";
 
-    private static final String DOWNLOAD_SWIFT_ARG_NAME = "url destination pattern threads";
+    private static final String DOWNLOAD_SWIFT_ARG_NAME = "linkfile destination pattern threads";
     private static final String DOWNLOAD_SWIFT_LONG_OPT_NAME = "download";
     private static final String DOWNLOAD_SWIFT_DESCRIPTION =
             "Downloads data from Swift. You have to provide a pattern for downloading files. A simple '.' " +

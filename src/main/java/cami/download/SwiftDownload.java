@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 public class SwiftDownload {
@@ -20,8 +21,15 @@ public class SwiftDownload {
       
         List<String> urls = new ArrayList<>();
 
+	String tmpStem = null;
+
         try {
 		BufferedReader reader = new BufferedReader(new FileReader(urlFile));
+
+		// top line of urlfile is a non-downloadable stem,
+		// so we can work out subdirectory paths
+		tmpStem = reader.readLine();
+
 		String inputUrl;
 		while((inputUrl = reader.readLine()) != null) {
 		    urls.add(inputUrl);
@@ -29,44 +37,49 @@ public class SwiftDownload {
         } catch (IOException e) {
             e.printStackTrace();
 	}
+
+	final String stem = tmpStem;
  
         ForkJoinPool forkJoinPool = new ForkJoinPool(threads);
         try {
             forkJoinPool.submit(() ->
                     urls.stream().parallel()
-                            .filter(url -> matchesRegex(regex, url))
-                            .forEach(url -> download(url, destination))).get();
+                            .filter(url -> matchesRegex(regex, url, stem))
+                            .forEach(url -> download(url, destination, stem))).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
-    public static boolean matchesRegex(String regex, String text) {
+    public static boolean matchesRegex(String regex, String text, String stem) {
 
         String[] urlParts = text.split("[?]", 2);
         String bareUrl = urlParts[0];
-        String params = "";
-        if (urlParts.length == 2) {
-          params = "?" + urlParts[1];
-        }
 
-        return Pattern.compile(regex).matcher(bareUrl).find();
+	int pos = stem.length();
+	String fileNamePrefix = bareUrl.substring(pos);
+
+        return Pattern.compile(regex).matcher(fileNamePrefix).find();
     }
 
 
-    public void download(String url, String destination) {
+    public void download(String url, String destination, String stem) {
 
         String[] urlParts = url.split("[?]", 2);
         String bareUrl = urlParts[0];
-        String params = "";
-        if (urlParts.length == 2) {
-          params = "?" + urlParts[1];
-        }
 
-	String[] bareUrlParts = bareUrl.split("/");
-	String file = Paths.get(destination, bareUrlParts[bareUrlParts.length - 1]).toString();
+        int responseCode = 0;
 
-        System.out.println(String.join(" ", "Downloading", url, "to", file));
+	int pos = stem.length();
+	String fileNamePrefix = bareUrl.substring(pos);
+
+	String fileNamePrefixDestination = Paths.get(destination, fileNamePrefix).toString();
+
+	File destinationFile = new File(fileNamePrefixDestination);
+	destinationFile.getParentFile().mkdirs();
+
+        System.out.println(String.join(" ", "Downloading", url, "to", fileNamePrefixDestination));
+
         URL website;
         try {
             website = new URL(url);
@@ -75,11 +88,27 @@ public class SwiftDownload {
             return;
         }
         try (InputStream in = website.openStream()) {
-            File destinationFile = new File(file);
-            destinationFile.getParentFile().mkdirs();
-            Files.copy(in, Paths.get(file), new StandardCopyOption[]{StandardCopyOption.REPLACE_EXISTING});
+            Files.copy(in, Paths.get(fileNamePrefixDestination), new StandardCopyOption[]{StandardCopyOption.REPLACE_EXISTING});
         } catch (IOException e) {
-            e.printStackTrace();
+       	    Matcher exMsgStatusCodeMatcher = Pattern.compile("^Server returned HTTP response code: (\\d+)").matcher(e.getMessage());
+            if(exMsgStatusCodeMatcher.find()) {
+                responseCode = Integer.parseInt(exMsgStatusCodeMatcher.group(1));
+            } else if(e.getClass().getSimpleName().equals("FileNotFoundException")) {
+                // 404 is a special case because it will throw a FileNotFoundException instead of having "404" in the message
+                responseCode = 404;
+            } else {
+                // There can be other types of exceptions not handled here
+                System.out.println("Exception (" + e.getClass().getSimpleName() + ") doesn't contain status code: " + e);
+		System.exit(1);
+            }
+
+	    if (responseCode == 401) {
+            	System.out.println("Link expired, aborting - please download link file again ((status code from parsing exception message: " + responseCode + ")");
+		System.exit(2);
+	    } else {
+            	System.out.println("Status code from parsing exception message: " + responseCode);
+		System.exit(3);
+	    }
         }
     }
 }

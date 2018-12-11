@@ -27,41 +27,56 @@ public class CLI {
     private static final String HELP_DESCRIPTION = "Print the help of the application";
     private static final String HELP_OPT_NAME = "h";
 
-    private static final String DOWNLOAD_SWIFT_ARG_NAME = "linkfile destination pattern threads";
+    private static final String DOWNLOAD_SWIFT_ARG_NAME = "linkfile> <destination";
     private static final String DOWNLOAD_SWIFT_LONG_OPT_NAME = "download";
     private static final String DOWNLOAD_SWIFT_DESCRIPTION =
-            "Downloads data from Swift. You have to provide a pattern for downloading files. A simple '.' " +
-                    "would download everything. Number of Threads is optional. Default: 10";
+            "Downloads data from Swift";
     private static final String DOWNLOAD_SWIFT_OPT_NAME = "d";
+
+    private static final String DOWNLOAD_PATTERN_ARG_NAME = "pattern";
+    private static final String DOWNLOAD_PATTERN_LONG_OPT_NAME = "pattern";
+    private static final String DOWNLOAD_PATTERN_DESCRIPTION = "Regular expression to use for downloading";
+    private static final String DOWNLOAD_PATTERN_OPT_NAME = "p";
+
+    private static final String DOWNLOAD_THREADS_ARG_NAME = "threads";
+    private static final String DOWNLOAD_THREADS_LONG_OPT_NAME = "threads";
+    private static final String DOWNLOAD_THREADS_DESCRIPTION = "Number of threads to use for downloading";
+    private static final String DOWNLOAD_THREADS_OPT_NAME = "t";
 
     private static final String ASSEMBLY_ARG_NAME = "assembly_file";
     private static final String ASSEMBLY_LONG_OPT_NAME = "assemblyFingerprint";
     private static final String ASSEMBLY_DESCRIPTION = "Computes fingerprint of an assembly file.";
     private static final String ASSEMBLY_OPT_NAME = "af";
 
-    private static final String BINNING_ARG_NAME = "binning_file extracted_taxnomy_db_path";
+    private static final String BINNING_ARG_NAME = "binning_file> <extracted_taxnomy_db_path";
     private static final String BINNING_LONG_OPT_NAME = "binningFingerprint";
-    private static final String BINNING_DESCRIPTION = "Validates binning file and computes fingerprint." +
+    private static final String BINNING_DESCRIPTION = "Validates binning file and computes fingerprint" +
             " (download the taxonomy_db from https://data.cami-challenge.org/participate (Databases Section))";
     private static final String BINNING_OPT_NAME = "bf";
 
-    private static final String PROFILING_ARG_NAME = "profiling_file extracted_taxnomy_db_path";
+    private static final String PROFILING_ARG_NAME = "profiling_file> <extracted_taxnomy_db_path";
     private static final String PROFILING_LONG_OPT_NAME = "profilingFingerprint";
-    private static final String PROFILING_DESCRIPTION = "Validates profiling file and computes fingerprint." +
-            "(download the taxonomy_db from https://data.cami-challenge.org/participate (Databases Section))";
+    private static final String PROFILING_DESCRIPTION = "Validates profiling file and computes fingerprint" +
+	    "(download the taxonomy_db from https://data.cami-challenge.org/participate (Databases Section))";
+
     private static final String PROFILING_OPT_NAME = "pf";
 
-    private static final String UPLOAD_ARG_NAME = "credentials_file file_to_upload";
+    private static final String UPLOAD_ARG_NAME = "credentials_file> <file_to_upload";
     private static final String UPLOAD_OPT_LONG_NAME = "upload";
     private static final String UPLOAD_DESCRIPTION =
-            "You can get the credentials file from the cami website. File to upload is the assembly, binning or " +
-                    "profiling file you want to upload.";
+            "You can get the credentials file from the cami website.";
     private static final String UPLOAD_OPT_NAME = "u";
 
     private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: %s ";
 
     public static final String VERSION = "1.5.0";
-    private static final String USAGE = "java -jar camiClient.jar";
+    private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile> <destination> [-p <pattern >] [-t <threads>]";
+    private static final String BINNING_USAGE = "java -jar camiClient.jar -bf <binning_file> <extracted_taxnomy_db_path>";
+    private static final String PROFILING_USAGE = "java -jar camiClient.jar -pf <profiling_file> <extracted_taxnomy_db_path>";
+    private static final String ASSEMBLY_USAGE = "java -jar camiClient.jar -af <assembly_file>";
+    private static final String UPLOAD_USAGE = "java -jar camiClient.jar -u <credentials_file> <file_to_upload>";
+    private static final String VERSION_USAGE = "java -jar camiClient.jar -v";
+    private static final String HELP_USAGE = "java -jar camiClient.jar -h";
 
     private final IValidator validator;
     private final IHashAlgorithm algorithm;
@@ -140,16 +155,33 @@ public class CLI {
 
     private void runDownload(CommandLine line) throws IOException {
         String[] args = line.getOptionValues(DOWNLOAD_SWIFT_OPT_NAME);
-        if (args.length != 3 && args.length != 4) {
+        if (args.length != 2) {
             throw new IOException(String.format(NOT_ENOUGH_PARAMETER, DOWNLOAD_SWIFT_ARG_NAME));
         }
+
         String source = args[0];
         String destination = args[1];
-        String regex = args[2];
-        int threads = 10;
-        if (args.length == 4) {
-            threads = Integer.parseInt(args[3]);
-        }
+	String regex = ".";
+	int threads = 10;
+
+        if (line.hasOption(DOWNLOAD_PATTERN_OPT_NAME)) {
+		args = line.getOptionValues(DOWNLOAD_PATTERN_OPT_NAME);
+		if (args.length != 1) {
+		    throw new IOException(String.format(NOT_ENOUGH_PARAMETER, DOWNLOAD_PATTERN_ARG_NAME));
+		}
+
+		regex = args[0];
+	}
+
+        if (line.hasOption(DOWNLOAD_THREADS_OPT_NAME)) {
+		args = line.getOptionValues(DOWNLOAD_THREADS_OPT_NAME);
+		if (args.length != 1) {
+		    throw new IOException(String.format(NOT_ENOUGH_PARAMETER, DOWNLOAD_THREADS_ARG_NAME));
+		}
+
+		threads = Integer.parseInt(args[0]);
+	}
+
         try {
             SwiftDownload swiftDownload = new SwiftDownload();
             swiftDownload.downloadAll(source, destination, regex, threads);
@@ -162,6 +194,23 @@ public class CLI {
     @SuppressWarnings("static-access")
     private static Options buildCommandLineOptions() {
         Options options = new Options();
+        // Download Swift option
+        options.addOption(OptionBuilder.withArgName(DOWNLOAD_SWIFT_ARG_NAME)
+                .withLongOpt(DOWNLOAD_SWIFT_LONG_OPT_NAME)
+                .hasArgs(2)
+                .withDescription(DOWNLOAD_SWIFT_DESCRIPTION)
+                .create(DOWNLOAD_SWIFT_OPT_NAME));
+        // Download sub arguments
+        options.addOption(OptionBuilder.withArgName(DOWNLOAD_PATTERN_ARG_NAME)
+                .withLongOpt(DOWNLOAD_PATTERN_LONG_OPT_NAME)
+                .hasArg()
+                .withDescription(DOWNLOAD_PATTERN_DESCRIPTION)
+                .create(DOWNLOAD_PATTERN_OPT_NAME));
+        options.addOption(OptionBuilder.withArgName(DOWNLOAD_THREADS_ARG_NAME)
+                .withLongOpt(DOWNLOAD_THREADS_LONG_OPT_NAME)
+                .hasArg()
+                .withDescription(DOWNLOAD_THREADS_DESCRIPTION)
+                .create(DOWNLOAD_THREADS_OPT_NAME));
         // Profiling option
         options.addOption(OptionBuilder.withArgName(PROFILING_ARG_NAME)
                 .withLongOpt(PROFILING_LONG_OPT_NAME)
@@ -187,12 +236,6 @@ public class CLI {
                 .withValueSeparator(' ')
                 .withDescription(UPLOAD_DESCRIPTION)
                 .create(UPLOAD_OPT_NAME));
-        // Download Swift option
-        options.addOption(OptionBuilder.withArgName(DOWNLOAD_SWIFT_ARG_NAME)
-                .withLongOpt(DOWNLOAD_SWIFT_LONG_OPT_NAME)
-                .hasArgs(4)
-                .withDescription(DOWNLOAD_SWIFT_DESCRIPTION)
-                .create(DOWNLOAD_SWIFT_OPT_NAME));
         // Help option
         options.addOption(OptionBuilder.withLongOpt(HELP_LONG_OPT_NAME)
                 .withDescription(HELP_DESCRIPTION)
@@ -206,10 +249,25 @@ public class CLI {
 
     private void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.setWidth(200);
-        String header = "Validates and uploads binning, profiling and assembly files. Downloads data from Swift.\n";
-        String footer = "\n";
-        formatter.printHelp(USAGE, header, options, footer, true);
+        formatter.setWidth(150);
+        String downloadHeader = "DOWNLOAD - downloads data from OpenStack\n\n";
+        String binningHeader = "BINNING - calculates binning header\n\n";
+        String profilingHeader = "PROFILING - calculates profiling header\n\n";
+        String assemblyHeader = "ASSEMBLY - calculates assembly header\n\n";
+        String uploadHeader = "UPLOAD - uploads data to OpenStack\n\n";
+        String versionHeader = "VERSION - shows client version\n\n";
+        String helpHeader = "HELP - shows this message\n\n";
+        String footer = "";
+        Options blankOptions = new Options();
+
+	System.out.println("\n");
+        formatter.printHelp(DOWNLOAD_USAGE, downloadHeader, blankOptions, footer, false);
+        formatter.printHelp(BINNING_USAGE, binningHeader, blankOptions, footer, false);
+        formatter.printHelp(PROFILING_USAGE, profilingHeader, blankOptions, footer, false);
+        formatter.printHelp(ASSEMBLY_USAGE, assemblyHeader, blankOptions, footer, false);
+        formatter.printHelp(UPLOAD_USAGE, uploadHeader, blankOptions, footer, false);
+        formatter.printHelp(VERSION_USAGE, versionHeader, blankOptions, footer, false);
+        formatter.printHelp(HELP_USAGE, helpHeader, options, footer, false);
     }
 
     private void computeFingerprint(String path) {

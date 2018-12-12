@@ -38,6 +38,12 @@ public class SwiftDownload {
             e.printStackTrace();
 	}
 
+	// hack to avoid changing ObjectStorageWrapper
+	String[] stemComponents = tmpStem.split("/");
+	int lastStemComponentLength = stemComponents[stemComponents.length-1].length()+1;
+	tmpStem = tmpStem.substring(lastStemComponentLength);
+	System.out.println(tmpStem);
+
 	final String stem = tmpStem;
  
         ForkJoinPool forkJoinPool = new ForkJoinPool(threads);

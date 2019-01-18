@@ -27,7 +27,7 @@ public class CLI {
     private static final String HELP_DESCRIPTION = "Print the help of the application";
     private static final String HELP_OPT_NAME = "h";
 
-    private static final String DOWNLOAD_SWIFT_ARG_NAME = "linkfile> <destination";
+    private static final String DOWNLOAD_SWIFT_ARG_NAME = "linkfile|url> <destination";
     private static final String DOWNLOAD_SWIFT_LONG_OPT_NAME = "download";
     private static final String DOWNLOAD_SWIFT_DESCRIPTION =
             "Downloads data from Swift";
@@ -42,6 +42,11 @@ public class CLI {
     private static final String DOWNLOAD_THREADS_LONG_OPT_NAME = "threads";
     private static final String DOWNLOAD_THREADS_DESCRIPTION = "Number of threads to use for downloading";
     private static final String DOWNLOAD_THREADS_OPT_NAME = "t";
+
+    private static final String LIST_SWIFT_ARG_NAME = "url";
+    private static final String LIST_SWIFT_LONG_OPT_NAME = "list";
+    private static final String LIST_SWIFT_DESCRIPTION = "Retrieves a list the data in public Swift Container";
+    private static final String LIST_SWIFT_OPT_NAME = "l";
 
     private static final String ASSEMBLY_ARG_NAME = "assembly_file";
     private static final String ASSEMBLY_LONG_OPT_NAME = "assemblyFingerprint";
@@ -69,8 +74,9 @@ public class CLI {
 
     private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: %s ";
 
-    public static final String VERSION = "1.5.0";
-    private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile> <destination> [-p <pattern >] [-t <threads>]";
+    public static final String VERSION = "1.6.0";
+    private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile|url> <destination> [-p <pattern >] [-t <threads>]";
+    private static final String LIST_USAGE = "java -jar camiClient.jar -l <url>";
     private static final String BINNING_USAGE = "java -jar camiClient.jar -bf <binning_file> <extracted_taxnomy_db_path>";
     private static final String PROFILING_USAGE = "java -jar camiClient.jar -pf <profiling_file> <extracted_taxnomy_db_path>";
     private static final String ASSEMBLY_USAGE = "java -jar camiClient.jar -af <assembly_file>";
@@ -108,6 +114,8 @@ public class CLI {
             runUpload(line);
         } else if (line.hasOption(DOWNLOAD_SWIFT_OPT_NAME) || line.hasOption(DOWNLOAD_SWIFT_LONG_OPT_NAME)) {
             runDownload(line);
+        } else if (line.hasOption(LIST_SWIFT_OPT_NAME) || line.hasOption(LIST_SWIFT_LONG_OPT_NAME)) {
+            runList(line);
         } else if (line.hasOption(VERSION_LONG_OPT_NAME) || line.hasOption(VERSION_OPT_NAME)) {
             System.out.println("Version:" + VERSION);
         } else {
@@ -183,8 +191,29 @@ public class CLI {
 	}
 
         try {
+            if (source.endsWith("/")) {
+                source = source.replaceFirst(".$", "");
+            }
             SwiftDownload swiftDownload = new SwiftDownload();
             swiftDownload.downloadAll(source, destination, regex, threads);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+
+    private void runList(CommandLine line) throws IOException {
+        String[] args = line.getOptionValues(LIST_SWIFT_OPT_NAME);
+        if (args.length != 1) {
+            throw new IOException(String.format(NOT_ENOUGH_PARAMETER, LIST_SWIFT_ARG_NAME));
+        }
+        String source = args[0];
+        try {
+            if (source.endsWith("/")) {
+                source = source.replaceFirst(".$", "");
+            }
+            SwiftDownload swiftDownload = new SwiftDownload();
+            System.out.println(swiftDownload.list(source));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -236,6 +265,12 @@ public class CLI {
                 .withValueSeparator(' ')
                 .withDescription(UPLOAD_DESCRIPTION)
                 .create(UPLOAD_OPT_NAME));
+        // List Swift option
+        options.addOption(OptionBuilder.withArgName(LIST_SWIFT_ARG_NAME)
+                .withLongOpt(LIST_SWIFT_LONG_OPT_NAME)
+                .hasArgs(1)
+                .withDescription(LIST_SWIFT_DESCRIPTION)
+                .create(LIST_SWIFT_OPT_NAME));
         // Help option
         options.addOption(OptionBuilder.withLongOpt(HELP_LONG_OPT_NAME)
                 .withDescription(HELP_DESCRIPTION)
@@ -251,6 +286,7 @@ public class CLI {
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(150);
         String downloadHeader = "DOWNLOAD - downloads data from OpenStack\n\n";
+        String listHeader = "LIST - lists data from public Swift storage\n\n";
         String binningHeader = "BINNING - calculates binning header\n\n";
         String profilingHeader = "PROFILING - calculates profiling header\n\n";
         String assemblyHeader = "ASSEMBLY - calculates assembly header\n\n";
@@ -262,6 +298,7 @@ public class CLI {
 
 	System.out.println("\n");
         formatter.printHelp(DOWNLOAD_USAGE, downloadHeader, blankOptions, footer, false);
+        formatter.printHelp(LIST_USAGE, listHeader, blankOptions, footer, false);
         formatter.printHelp(BINNING_USAGE, binningHeader, blankOptions, footer, false);
         formatter.printHelp(PROFILING_USAGE, profilingHeader, blankOptions, footer, false);
         formatter.printHelp(ASSEMBLY_USAGE, assemblyHeader, blankOptions, footer, false);

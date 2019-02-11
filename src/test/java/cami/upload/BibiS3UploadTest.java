@@ -45,6 +45,7 @@ public class BibiS3UploadTest {
         ICredentials credentials = builder.getCredentials(129600, "bob");
 
         credentialsMap = new HashMap<>();
+/*
         credentialsMap.put(BibiS3Upload.ACCESS_KEY, credentials.getAccessKey());
         credentialsMap.put(BibiS3Upload.SECRET_KEY, credentials.getSecretAccessKey());
         credentialsMap.put(BibiS3Upload.SESSION_TOKEN, credentials.getSessionToken());
@@ -54,7 +55,7 @@ public class BibiS3UploadTest {
         System.out.println(credentials.getAccessKey());
         System.out.println(credentials.getSecretAccessKey());
         System.out.println(credentials.getSessionToken());
-
+*/
     }
 
     //@BeforeClass
@@ -77,12 +78,14 @@ public class BibiS3UploadTest {
             assertEquals(list.size(), 1);
             manager.delete("junit/camiClient/bibiS3UploadTest/testUpload/binning.txt");
         });
+/*
         upload.startUpload(credentialsMap.get(BibiS3Upload.ACCESS_KEY),
                 credentialsMap.get(BibiS3Upload.SECRET_KEY),
                 credentialsMap.get(BibiS3Upload.SESSION_TOKEN),
                 credentialsMap.get(BibiS3Upload.FINGERPRINT),
                 path,
                 credentialsMap.get(BibiS3Upload.PATH));
+*/
     }
 
     //@Test
@@ -92,14 +95,16 @@ public class BibiS3UploadTest {
         exit.checkAssertionAfterwards(() -> {
             Map<String, String> metadataMap = manager.getObjectMetadata(
                     "junit/camiClient/bibiS3UploadTest/testUpload/binning.txt");
-            assertEquals(FINGERPRINT, metadataMap.get(BibiS3Upload.FINGERPRINT));
+            // assertEquals(FINGERPRINT, metadataMap.get(BibiS3Upload.FINGERPRINT));
             manager.delete("junit/camiClient/bibiS3UploadTest/testUpload/binning.txt");
         });
+/*
         upload.startUpload(credentialsMap.get(BibiS3Upload.ACCESS_KEY),
                 credentialsMap.get(BibiS3Upload.SECRET_KEY),
                 credentialsMap.get(BibiS3Upload.SESSION_TOKEN),
                 credentialsMap.get(BibiS3Upload.FINGERPRINT),
                 path,
                 credentialsMap.get(BibiS3Upload.PATH));
+*/
     }
 }

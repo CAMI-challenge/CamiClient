@@ -66,10 +66,10 @@ public class CLI {
 
     private static final String PROFILING_OPT_NAME = "pf";
 
-    private static final String UPLOAD_ARG_NAME = "credentials_file> <file_to_upload";
+    private static final String UPLOAD_ARG_NAME = "linkfile> <file_to_upload";
     private static final String UPLOAD_OPT_LONG_NAME = "upload";
     private static final String UPLOAD_DESCRIPTION =
-            "You can get the credentials file from the cami website.";
+            "Uploads data to Swift";
     private static final String UPLOAD_OPT_NAME = "u";
 
     private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: %s ";
@@ -80,7 +80,7 @@ public class CLI {
     private static final String BINNING_USAGE = "java -jar camiClient.jar -bf <binning_file> <extracted_taxnomy_db_path>";
     private static final String PROFILING_USAGE = "java -jar camiClient.jar -pf <profiling_file> <extracted_taxnomy_db_path>";
     private static final String ASSEMBLY_USAGE = "java -jar camiClient.jar -af <assembly_file>";
-    private static final String UPLOAD_USAGE = "java -jar camiClient.jar -u <credentials_file> <file_to_upload>";
+    private static final String UPLOAD_USAGE = "java -jar camiClient.jar -u <linkfile> <file_to_upload>";
     private static final String VERSION_USAGE = "java -jar camiClient.jar -v";
     private static final String HELP_USAGE = "java -jar camiClient.jar -h";
 
@@ -152,10 +152,10 @@ public class CLI {
         if (args.length != 2) {
             throw new IOException(String.format(NOT_ENOUGH_PARAMETER, UPLOAD_ARG_NAME));
         }
-        String credentialsFile = args[0];
+        String linkFile = args[0];
         String fileToUpload = args[1];
         try {
-            this.upload.upload(fileToUpload, credentialsFile);
+            this.upload.upload(fileToUpload, linkFile);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

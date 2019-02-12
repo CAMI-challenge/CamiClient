@@ -9,6 +9,8 @@ import cami.upload.IUpload;
 import cami.validator.CamiIOValidator;
 import cami.validator.IValidator;
 import org.apache.commons.cli.*;
+import org.apache.log4j.PropertyConfigurator;
+import java.util.Properties;
 
 import java.io.IOException;
 
@@ -319,6 +321,11 @@ public class CLI {
     }
 
     public static void main(String[] args) {
+
+	Properties prop = new Properties();
+	prop.setProperty("log4j.rootLogger", "WARN");
+	PropertyConfigurator.configure(prop);
+
         CLI uploader = new CLI(new CamiIOValidator(), new BibiS3Upload(), new MD5Sum());
         try {
             uploader.processCommandLine(args);

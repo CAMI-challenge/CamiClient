@@ -29,7 +29,7 @@ public class BibiS3Upload implements IUpload {
 	File fileToUpload = null;
 	URI uploadUri = null;
 
-        System.out.println("upload starting using linkfile");
+        System.out.println("uploading " + sourcePath);
         File linkFile = new File(linkFilePath);
         if (!linkFile.exists()) {
             throw new IOException("file:" + linkFilePath + " does not exist.");
@@ -53,11 +53,6 @@ public class BibiS3Upload implements IUpload {
             e.printStackTrace();
         }
 
-	System.out.println(sourcePath);
-	System.out.println(uploadUri);
-	// System.out.println(fingerprint);
-
-
         startUpload(fileToUpload, uploadUri, fingerprint);
     }
 
@@ -79,7 +74,7 @@ public class BibiS3Upload implements IUpload {
 
              httpput.setEntity(reqEntity);
 
-             System.out.println("executing request " + httpput.getRequestLine());
+             // System.out.println("executing request " + httpput.getRequestLine());
              CloseableHttpResponse response = httpclient.execute(httpput);
              try {
                 System.out.println("----------------------------------------");

@@ -95,6 +95,9 @@ public class CLI {
     }
 
     public void processCommandLine(String[] commandLine) throws IOException, Base.ParseException, ParseException {
+	for (int i = 0; i < commandLine.length; i++) {
+		commandLine[i] = commandLine[i].replace(' ', 'ᴥ');
+	}
         Options options = buildCommandLineOptions();
         CommandLineParser parser = new BasicParser();
         CommandLine line;
@@ -153,7 +156,9 @@ public class CLI {
             throw new IOException(String.format(NOT_ENOUGH_PARAMETER, UPLOAD_ARG_NAME));
         }
         String linkFile = args[0];
+	linkFile = linkFile.replace('ᴥ', ' ');
         String fileToUpload = args[1];
+	fileToUpload = fileToUpload.replace('ᴥ', ' ');
         try {
             this.upload.upload(fileToUpload, linkFile);
         } catch (IOException e) {

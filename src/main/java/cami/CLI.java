@@ -134,8 +134,12 @@ public class CLI {
         if (args.length != 2) {
             throw new IOException(String.format(NOT_ENOUGH_PARAMETER, BINNING_ARG_NAME));
         }
-        validator.validateBinning(args[0], args[1]);
-        computeFingerprint(path);
+        String binningFile = args[0];
+        binningFile = binningFile.replace('ᴥ', ' ');
+        String extractPath = args[1];
+        extractPath = extractPath.replace('ᴥ', ' ');
+        validator.validateBinning(binningFile, extractPath);
+        computeFingerprint(binningFile);
     }
 
     private void runProfiling(CommandLine line) throws IOException, Base.ParseException {
@@ -143,13 +147,19 @@ public class CLI {
         if (args.length != 2) {
             throw new IOException(String.format(NOT_ENOUGH_PARAMETER, PROFILING_ARG_NAME));
         }
-        validator.validateProfiling(args[0], args[1]);
-        computeFingerprint(args[0]);
+        String profilingFile = args[0];
+        profilingFile = profilingFile.replace('ᴥ', ' ');
+        String extractPath = args[1];
+        extractPath = extractPath.replace('ᴥ', ' ');
+        validator.validateProfiling(profilingFile, extractPath);
+        computeFingerprint(profilingFile);
     }
 
     private void runValidateAssembly(CommandLine line) {
         String path = line.getOptionValue(ASSEMBLY_OPT_NAME);
-        computeFingerprint(path);
+        String assemblyFile = path;
+        assemblyFile = assemblyFile.replace('ᴥ', ' ');
+        computeFingerprint(assemblyFile);
     }
 
     private void runUpload(CommandLine line) throws IOException {
@@ -176,6 +186,8 @@ public class CLI {
 
         String source = args[0];
         String destination = args[1];
+	source = source.replace('ᴥ', ' ');
+	destination = destination.replace('ᴥ', ' ');
 	String regex = ".";
 	int threads = 10;
 

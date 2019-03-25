@@ -37,7 +37,7 @@ public class CLI {
 
     private static final String DOWNLOAD_PATTERN_ARG_NAME = "pattern";
     private static final String DOWNLOAD_PATTERN_LONG_OPT_NAME = "pattern";
-    private static final String DOWNLOAD_PATTERN_DESCRIPTION = "Regular expression to use for downloading";
+    private static final String DOWNLOAD_PATTERN_DESCRIPTION = "Pattern to use for downloading, to select only specific files to be downloaded eg. '-p long' selects only those files with long in the name";
     private static final String DOWNLOAD_PATTERN_OPT_NAME = "p";
 
     private static final String DOWNLOAD_THREADS_ARG_NAME = "threads";

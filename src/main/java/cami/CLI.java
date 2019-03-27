@@ -3,6 +3,7 @@ package cami;
 import cami.download.SwiftDownload;
 import cami.hash.IHashAlgorithm;
 import cami.hash.MD5Sum;
+import cami.hash.SHA1Sum;
 import cami.io.Base;
 import cami.upload.BibiS3Upload;
 import cami.upload.IUpload;
@@ -45,6 +46,16 @@ public class CLI {
     private static final String DOWNLOAD_THREADS_DESCRIPTION = "Number of threads to use for downloading";
     private static final String DOWNLOAD_THREADS_OPT_NAME = "t";
 
+    private static final String DOWNLOAD_RETRY_ARG_NAME = "retry";
+    private static final String DOWNLOAD_RETRY_LONG_OPT_NAME = "retry";
+    private static final String DOWNLOAD_RETRY_DESCRIPTION = "Retry existing files when checksum is incorrect (or not present)";
+    private static final String DOWNLOAD_RETRY_OPT_NAME = "r";
+
+    private static final String DOWNLOAD_FORCERETRY_ARG_NAME = "force";
+    private static final String DOWNLOAD_FORCERETRY_LONG_OPT_NAME = "force";
+    private static final String DOWNLOAD_FORCERETRY_DESCRIPTION = "When specified with -r, retry existing files regardless of checksum";
+    private static final String DOWNLOAD_FORCERETRY_OPT_NAME = "f";
+
     private static final String LIST_SWIFT_ARG_NAME = "url";
     private static final String LIST_SWIFT_LONG_OPT_NAME = "list";
     private static final String LIST_SWIFT_DESCRIPTION = "Retrieves a list the data in public Swift Container";
@@ -77,7 +88,7 @@ public class CLI {
     private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: %s ";
 
     public static final String VERSION = "1.6.0";
-    private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile|url> <destination> [-p <pattern >] [-t <threads>]";
+    private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile|url> <destination> [-p <pattern >] [-t <threads>] [-r [-f]]";
     private static final String LIST_USAGE = "java -jar camiClient.jar -l <url>";
     private static final String BINNING_USAGE = "java -jar camiClient.jar -bf <binning_file> <extracted_taxnomy_db_path>";
     private static final String PROFILING_USAGE = "java -jar camiClient.jar -pf <profiling_file> <extracted_taxnomy_db_path>";
@@ -88,11 +99,13 @@ public class CLI {
 
     private final IValidator validator;
     private final IHashAlgorithm algorithm;
+    private final IHashAlgorithm downloadAlgorithm;
     private final IUpload upload;
 
-    public CLI(IValidator validator, IUpload upload, IHashAlgorithm algorithm) {
+    public CLI(IValidator validator, IUpload upload, IHashAlgorithm algorithm, IHashAlgorithm downloadAlgorithm) {
         this.validator = validator;
         this.algorithm = algorithm;
+        this.downloadAlgorithm = downloadAlgorithm;
         this.upload = upload;
     }
 
@@ -190,6 +203,8 @@ public class CLI {
 	destination = destination.replace('ᴥ', ' ');
 	String regex = ".";
 	int threads = 10;
+	boolean retry = false;
+	boolean forceRetry = false;
 
         if (line.hasOption(DOWNLOAD_PATTERN_OPT_NAME)) {
 		args = line.getOptionValues(DOWNLOAD_PATTERN_OPT_NAME);
@@ -209,12 +224,24 @@ public class CLI {
 		threads = Integer.parseInt(args[0]);
 	}
 
+        if (line.hasOption(DOWNLOAD_RETRY_OPT_NAME)) {
+		args = line.getOptionValues(DOWNLOAD_RETRY_OPT_NAME);
+
+		retry = true;
+	}
+
+        if (line.hasOption(DOWNLOAD_FORCERETRY_OPT_NAME)) {
+		args = line.getOptionValues(DOWNLOAD_FORCERETRY_OPT_NAME);
+
+		forceRetry = true;
+	}
+
         try {
             if (source.endsWith("/")) {
                 source = source.replaceFirst(".$", "");
             }
             SwiftDownload swiftDownload = new SwiftDownload();
-            swiftDownload.downloadAll(source, destination, regex, threads);
+            swiftDownload.downloadAll(source, destination, regex, threads, retry, forceRetry, downloadAlgorithm);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -259,6 +286,14 @@ public class CLI {
                 .hasArg()
                 .withDescription(DOWNLOAD_THREADS_DESCRIPTION)
                 .create(DOWNLOAD_THREADS_OPT_NAME));
+        options.addOption(OptionBuilder.withArgName(DOWNLOAD_RETRY_ARG_NAME)
+                .withLongOpt(DOWNLOAD_RETRY_LONG_OPT_NAME)
+                .withDescription(DOWNLOAD_RETRY_DESCRIPTION)
+                .create(DOWNLOAD_RETRY_OPT_NAME));
+        options.addOption(OptionBuilder.withArgName(DOWNLOAD_FORCERETRY_ARG_NAME)
+                .withLongOpt(DOWNLOAD_FORCERETRY_LONG_OPT_NAME)
+                .withDescription(DOWNLOAD_FORCERETRY_DESCRIPTION)
+                .create(DOWNLOAD_FORCERETRY_OPT_NAME));
         // Profiling option
         options.addOption(OptionBuilder.withArgName(PROFILING_ARG_NAME)
                 .withLongOpt(PROFILING_LONG_OPT_NAME)
@@ -338,7 +373,7 @@ public class CLI {
 	prop.setProperty("log4j.rootLogger", "WARN");
 	PropertyConfigurator.configure(prop);
 
-        CLI uploader = new CLI(new CamiIOValidator(), new BibiS3Upload(), new MD5Sum());
+        CLI uploader = new CLI(new CamiIOValidator(), new BibiS3Upload(), new MD5Sum(), new SHA1Sum());
         try {
             uploader.processCommandLine(args);
         } catch (IOException | Base.ParseException | ParseException e) {

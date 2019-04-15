@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import cami.io.Base;
 import cami.upload.BibiS3Upload;
 import cami.hash.MD5Sum;
+import cami.hash.SHA1Sum;
 import cami.validator.CamiIOValidator;
 import org.apache.commons.cli.ParseException;
 
@@ -30,7 +31,7 @@ public class CliTest {
 
     private void runCommandLine(String[] args) {
         Exception ex = null;
-        CLI cli = new CLI(new CamiIOValidator(), new BibiS3Upload(), new MD5Sum());
+        CLI cli = new CLI(new CamiIOValidator(), new BibiS3Upload(), new MD5Sum(), new SHA1Sum());
         try {
             cli.processCommandLine(args);
         } catch (IOException | Base.ParseException | ParseException e) {

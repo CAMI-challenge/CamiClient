@@ -21,6 +21,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.http.entity.FileEntity;
 
 public class BibiS3Upload implements IUpload {
 
@@ -37,7 +38,6 @@ public class BibiS3Upload implements IUpload {
 
 	Scanner linkFileScanner = new Scanner(new FileReader(linkFile));
 	try {
-	    // fingerprint = linkFileScanner.next();
             uploadUri = new URI(linkFileScanner.next());	
 	} catch (Exception e) {
 	    System.out.println("Malformed linkfile");
@@ -61,30 +61,25 @@ public class BibiS3Upload implements IUpload {
           CloseableHttpClient httpclient = HttpClients.createDefault();
           try {
              HttpPut httpput = new HttpPut(uploadLink);
+	     httpput.addHeader("content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-             FileBody bin = new FileBody(fileToUpload);
-             StringBody comment = new StringBody("A binary file of some kind", ContentType.TEXT_PLAIN);
-             // StringBody fingerprintBody = new StringBody(fingerprint, ContentType.TEXT_PLAIN);
+	     FileEntity entity = new FileEntity(fileToUpload);
 
-             HttpEntity reqEntity = MultipartEntityBuilder.create()
-                .addPart("bin", bin)
-                .addPart("comment", comment)
-                .build();
-                // .addPart("fingerprint", fingerprintBody)
+             httpput.setEntity(entity);
 
-             httpput.setEntity(reqEntity);
-
-             // System.out.println("executing request " + httpput.getRequestLine());
              CloseableHttpResponse response = httpclient.execute(httpput);
+	     int statusCode = 0;
              try {
-                System.out.println("----------------------------------------");
-                System.out.println(response.getStatusLine());
+                statusCode = response.getStatusLine().getStatusCode();
+
                 HttpEntity resEntity = response.getEntity();
-                if (resEntity != null) {
-                     System.out.println("Response content length: " +    resEntity.getContentLength());
-                }
               EntityUtils.consume(resEntity);
              } finally {
+		 if (statusCode == 201) {
+			System.out.println("Upload successful");
+		 } else {
+			System.out.println("Upload failed with status code == " + statusCode);
+		 }	
                  response.close();
              }
 	  } catch(Exception e) {

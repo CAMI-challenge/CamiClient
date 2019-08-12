@@ -85,7 +85,7 @@ public class CLI {
             "Uploads data to Swift";
     private static final String UPLOAD_OPT_NAME = "u";
 
-    private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: %s ";
+    private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: <%s> ";
 
     public static final String VERSION = "1.8.0";
     private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile|url> <destination> [-p <pattern >] [-t <threads>] [-r [-f]]";

@@ -66,13 +66,13 @@ public class CLI {
     private static final String ASSEMBLY_DESCRIPTION = "Computes fingerprint of an assembly file.";
     private static final String ASSEMBLY_OPT_NAME = "af";
 
-    private static final String BINNING_ARG_NAME = "binning_file> <extracted_taxnomy_db_path";
+    private static final String BINNING_ARG_NAME = "binning_file> <extracted_taxonomy_db_path";
     private static final String BINNING_LONG_OPT_NAME = "binningFingerprint";
     private static final String BINNING_DESCRIPTION = "Validates binning file and computes fingerprint" +
             " (download the taxonomy_db from https://data.cami-challenge.org/participate (Databases Section))";
     private static final String BINNING_OPT_NAME = "bf";
 
-    private static final String PROFILING_ARG_NAME = "profiling_file> <extracted_taxnomy_db_path";
+    private static final String PROFILING_ARG_NAME = "profiling_file> <extracted_taxonomy_db_path";
     private static final String PROFILING_LONG_OPT_NAME = "profilingFingerprint";
     private static final String PROFILING_DESCRIPTION = "Validates profiling file and computes fingerprint" +
 	    "(download the taxonomy_db from https://data.cami-challenge.org/participate (Databases Section))";
@@ -87,11 +87,11 @@ public class CLI {
 
     private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: <%s> ";
 
-    public static final String VERSION = "1.8.0";
+    public static final String VERSION = "1.8.1";
     private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile|url> <destination> [-p <pattern >] [-t <threads>] [-r [-f]]";
     private static final String LIST_USAGE = "java -jar camiClient.jar -l <url>";
-    private static final String BINNING_USAGE = "java -jar camiClient.jar -bf <binning_file> <extracted_taxnomy_db_path>";
-    private static final String PROFILING_USAGE = "java -jar camiClient.jar -pf <profiling_file> <extracted_taxnomy_db_path>";
+    private static final String BINNING_USAGE = "java -jar camiClient.jar -bf <binning_file> <extracted_taxonomy_db_path>";
+    private static final String PROFILING_USAGE = "java -jar camiClient.jar -pf <profiling_file> <extracted_taxonomy_db_path>";
     private static final String ASSEMBLY_USAGE = "java -jar camiClient.jar -af <assembly_file>";
     private static final String UPLOAD_USAGE = "java -jar camiClient.jar -u <linkfile> <file_to_upload>";
     private static final String VERSION_USAGE = "java -jar camiClient.jar -v";

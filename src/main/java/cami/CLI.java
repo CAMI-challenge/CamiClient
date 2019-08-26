@@ -61,6 +61,11 @@ public class CLI {
     private static final String LIST_SWIFT_DESCRIPTION = "Retrieves a list the data in public Swift Container";
     private static final String LIST_SWIFT_OPT_NAME = "l";
 
+    private static final String CLINICALPATHOLOGY_ARG_NAME = "clinicalpathology_file";
+    private static final String CLINICALPATHOLOGY_LONG_OPT_NAME = "clinicalPathologyFingerprint";
+    private static final String CLINICALPATHOLOGY_DESCRIPTION = "Computes fingerprint of a clinical pathology file.";
+    private static final String CLINICALPATHOLOGY_OPT_NAME = "cf";
+
     private static final String ASSEMBLY_ARG_NAME = "assembly_file";
     private static final String ASSEMBLY_LONG_OPT_NAME = "assemblyFingerprint";
     private static final String ASSEMBLY_DESCRIPTION = "Computes fingerprint of an assembly file.";
@@ -87,11 +92,12 @@ public class CLI {
 
     private static final String NOT_ENOUGH_PARAMETER = "Please provide the parameters: <%s> ";
 
-    public static final String VERSION = "1.8.1";
+    public static final String VERSION = "1.9.0";
     private static final String DOWNLOAD_USAGE = "java -jar camiClient.jar -d <linkfile|url> <destination> [-p <pattern >] [-t <threads>] [-r [-f]]";
     private static final String LIST_USAGE = "java -jar camiClient.jar -l <url>";
     private static final String BINNING_USAGE = "java -jar camiClient.jar -bf <binning_file> <extracted_taxonomy_db_path>";
     private static final String PROFILING_USAGE = "java -jar camiClient.jar -pf <profiling_file> <extracted_taxonomy_db_path>";
+    private static final String CLINICALPATHOLOGY_USAGE = "java -jar camiClient.jar -cf <clinical_pathology_file>";
     private static final String ASSEMBLY_USAGE = "java -jar camiClient.jar -af <assembly_file>";
     private static final String UPLOAD_USAGE = "java -jar camiClient.jar -u <linkfile> <file_to_upload>";
     private static final String VERSION_USAGE = "java -jar camiClient.jar -v";
@@ -126,6 +132,8 @@ public class CLI {
             runValidateBinning(line);
         } else if (line.hasOption(PROFILING_OPT_NAME) || line.hasOption(PROFILING_LONG_OPT_NAME)) {
             runProfiling(line);
+        } else if (line.hasOption(CLINICALPATHOLOGY_OPT_NAME) || line.hasOption(CLINICALPATHOLOGY_LONG_OPT_NAME)) {
+            runValidateClinicalPathology(line);
         } else if (line.hasOption(ASSEMBLY_OPT_NAME) || line.hasOption(ASSEMBLY_LONG_OPT_NAME)) {
             runValidateAssembly(line);
         } else if (line.hasOption(UPLOAD_OPT_NAME) || line.hasOption(UPLOAD_OPT_LONG_NAME)) {
@@ -173,6 +181,13 @@ public class CLI {
         String assemblyFile = path;
         assemblyFile = assemblyFile.replace('ᴥ', ' ');
         computeFingerprint(assemblyFile);
+    }
+
+    private void runValidateClinicalPathology(CommandLine line) {
+        String path = line.getOptionValue(CLINICALPATHOLOGY_OPT_NAME);
+        String clinicalPathologyFile = path;
+        clinicalPathologyFile = clinicalPathologyFile.replace('ᴥ', ' ');
+        computeFingerprint(clinicalPathologyFile);
     }
 
     private void runUpload(CommandLine line) throws IOException {
@@ -312,6 +327,12 @@ public class CLI {
                 .hasArg(true)
                 .withDescription(ASSEMBLY_DESCRIPTION)
                 .create(ASSEMBLY_OPT_NAME));
+        // Validate clinicalPathology option
+        options.addOption(OptionBuilder.withArgName(CLINICALPATHOLOGY_ARG_NAME)
+                .withLongOpt(CLINICALPATHOLOGY_LONG_OPT_NAME)
+                .hasArg(true)
+                .withDescription(CLINICALPATHOLOGY_DESCRIPTION)
+                .create(CLINICALPATHOLOGY_OPT_NAME));
         // Upload option
         options.addOption(OptionBuilder.withArgName(UPLOAD_ARG_NAME)
                 .withLongOpt(UPLOAD_OPT_LONG_NAME)
@@ -344,6 +365,7 @@ public class CLI {
         String binningHeader = "BINNING - calculates binning header\n\n";
         String profilingHeader = "PROFILING - calculates profiling header\n\n";
         String assemblyHeader = "ASSEMBLY - calculates assembly header\n\n";
+        String clinicalPathologyHeader = "CLINICALPATHOLOGY - calculates clinical pathology header\n\n";
         String uploadHeader = "UPLOAD - uploads data to OpenStack\n\n";
         String versionHeader = "VERSION - shows client version\n\n";
         String helpHeader = "HELP - shows this message\n\n";
@@ -356,6 +378,7 @@ public class CLI {
         formatter.printHelp(BINNING_USAGE, binningHeader, blankOptions, footer, false);
         formatter.printHelp(PROFILING_USAGE, profilingHeader, blankOptions, footer, false);
         formatter.printHelp(ASSEMBLY_USAGE, assemblyHeader, blankOptions, footer, false);
+        formatter.printHelp(CLINICALPATHOLOGY_USAGE, clinicalPathologyHeader, blankOptions, footer, false);
         formatter.printHelp(UPLOAD_USAGE, uploadHeader, blankOptions, footer, false);
         formatter.printHelp(VERSION_USAGE, versionHeader, blankOptions, footer, false);
         formatter.printHelp(HELP_USAGE, helpHeader, options, footer, false);
